@@ -216,11 +216,15 @@
       ],
       reachMax: 14,
       clickStatus: [
-        { status: "Haven't clicked to any page", count: 8, sent: 21 / 8, opened: 4, clicked: 0 },
-        { status: "Clicked Calculator", count: 3, sent: 7 / 3, opened: 5, clicked: 4 },
-        { status: "Clicked BOFU", count: 3, sent: 6 / 3, opened: 6, clicked: 6 },
+        { status: "Haven't clicked to any page", sent: 1, count: 1, opened: 1, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 2, count: 1, opened: 0, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 6, opened: 3, clicked: 0 },
+        { status: "Clicked Calculator", sent: 2, count: 2, opened: 4, clicked: 3 },
+        { status: "Clicked Calculator", sent: 3, count: 1, opened: 1, clicked: 1 },
+        { status: "Clicked BOFU", sent: 2, count: 3, opened: 6, clicked: 6 },
       ],
       contactsClickedToPage: 6,
+      clickedBreakdown: { onlyCalculator: 3, onlyBofu: 0, both: 3 },
       emailBreakdown: [
         { mailer: "MOFU Mailer 1", count: 14, opened: 7, clicked: 4 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 7, opened: 0, clicked: 0 },
@@ -249,11 +253,15 @@
       ],
       reachMax: 42,
       clickStatus: [
-        { status: "Haven't clicked to any page", count: 21, sent: 60 / 21, opened: 16, clicked: 0 },
-        { status: "Clicked Calculator", count: 9, sent: 16 / 9, opened: 12, clicked: 9 },
-        { status: "Clicked BOFU", count: 12, sent: 24 / 12, opened: 24, clicked: 24 },
+        { status: "Haven't clicked to any page", sent: 2, count: 3, opened: 0, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 18, opened: 16, clicked: 0 },
+        { status: "Clicked Calculator", sent: 1, count: 3, opened: 3, clicked: 3 },
+        { status: "Clicked Calculator", sent: 2, count: 5, opened: 8, clicked: 5 },
+        { status: "Clicked Calculator", sent: 3, count: 1, opened: 1, clicked: 1 },
+        { status: "Clicked BOFU", sent: 2, count: 12, opened: 24, clicked: 24 },
       ],
       contactsClickedToPage: 21,
+      clickedBreakdown: { onlyCalculator: 9, onlyBofu: 0, both: 12 },
       emailBreakdown: [
         { mailer: "MOFU Mailer 1", count: 42, opened: 24, clicked: 20 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 18, opened: 2, clicked: 0 },
@@ -282,8 +290,9 @@
       ],
       reachMax: 4,
       clickStatus: [
-        { status: "Haven't clicked to any page", count: 2, sent: 4 / 2, opened: 0, clicked: 0 },
-        { status: "Clicked CTA link", count: 2, sent: 3 / 2, opened: 2, clicked: 2 },
+        { status: "Haven't clicked to any page", sent: 2, count: 2, opened: 0, clicked: 0 },
+        { status: "Clicked CTA link", sent: 1, count: 1, opened: 1, clicked: 1 },
+        { status: "Clicked CTA link", sent: 2, count: 1, opened: 1, clicked: 1 },
       ],
       contactsClickedToPage: 2,
       emailBreakdown: [
@@ -314,8 +323,8 @@
   function clickStatusRowHtml(s) {
     return `<tr>
       <td><span class="stage-badge"><span class="stage-dot" style="background:${clickStatusColor(s.status)}"></span>${s.status}</span></td>
+      <td class="num">${s.sent}</td>
       <td class="num">${s.count}</td>
-      <td class="num">${s.sent.toFixed(1)}</td>
       <td class="num">${s.opened}</td>
       <td class="num">${s.clicked}</td>
     </tr>`;
@@ -399,14 +408,14 @@
 
       <section>
         <h2>Where contacts stand — by click status</h2>
-        <h3 class="subtle">No individual contact data is shown here — counts and totals only. "Avg sent" is the average number of emails a contact in that group received (some got fewer because they clicked early, others got more because they didn't open and were resent). "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
+        <h3 class="subtle">No individual contact data is shown here — counts and totals only. Contacts are grouped by exactly how many emails they were sent, so "Emails sent" is a real number, not an average. "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
         <div class="table-scroll">
           <table id="summary-table">
             <thead>
               <tr>
                 <th data-key="status">Click status</th>
+                <th data-key="sent" class="num">Emails sent<span class="arrow"></span></th>
                 <th data-key="count" class="num">Contacts<span class="arrow"></span></th>
-                <th data-key="sent" class="num">Avg sent<span class="arrow"></span></th>
                 <th data-key="opened" class="num">Opened<span class="arrow"></span></th>
                 <th data-key="clicked" class="num">Clicked<span class="arrow"></span></th>
               </tr>
@@ -449,6 +458,19 @@
                 <td>Number of contacts who clicked to the page</td>
                 <td class="num">${wf.contactsClickedToPage} / ${k.contacts}</td>
               </tr>
+              ${wf.clickedBreakdown ? `
+              <tr>
+                <td>Clicked only the Calculator page</td>
+                <td class="num">${wf.clickedBreakdown.onlyCalculator} / ${k.contacts}</td>
+              </tr>
+              <tr>
+                <td>Clicked only the BOFU page</td>
+                <td class="num">${wf.clickedBreakdown.onlyBofu} / ${k.contacts}</td>
+              </tr>
+              <tr>
+                <td>Clicked both the Calculator and BOFU pages</td>
+                <td class="num">${wf.clickedBreakdown.both} / ${k.contacts}</td>
+              </tr>` : ''}
             </tbody>
           </table>
         </div>
@@ -483,7 +505,13 @@
     document.getElementById('report-root').innerHTML = pageHtml(wf);
 
     renderHBars('reach-chart', wf.reachChart, wf.reachMax);
-    renderHBars('stage-chart', wf.clickStatus.map(s => ({
+    const statusTotals = [];
+    wf.clickStatus.forEach(s => {
+      let entry = statusTotals.find(e => e.status === s.status);
+      if (!entry) { entry = { status: s.status, count: 0 }; statusTotals.push(entry); }
+      entry.count += s.count;
+    });
+    renderHBars('stage-chart', statusTotals.map(s => ({
       label: s.status, value: s.count, color: clickStatusColor(s.status),
       tooltip: `${s.count} contact${s.count === 1 ? '' : 's'} — ${s.status.toLowerCase()}`,
     })));
