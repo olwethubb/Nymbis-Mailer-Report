@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everlytic Workflow Reports</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --warning-text:   #7a5200;
+    --critical:       #d03b3b;
+    --accent:         #2a78d6;
+    --step-1: #86b6ef; --step-2: #5598e7; --step-3: #2a78d6; --step-4: #1c5cab;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good:           #0ca30c;
+      --warning:        #fab219;
+      --warning-text:   #ffce6b;
+      --critical:       #e66767;
+      --accent:         #3987e5;
+      --step-1: #6da7ec; --step-2: #3987e5; --step-3: #256abf; --step-4: #184f95;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good:           #0ca30c;
+    --warning:        #fab219;
+    --warning-text:   #ffce6b;
+    --critical:       #e66767;
+    --accent:         #3987e5;
+    --step-1: #6da7ec; --step-2: #3987e5; --step-3: #256abf; --step-4: #184f95;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .viz-root {
+    background: var(--page-plane);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+
+  /* Nav bar */
+  /* Fixed brand-blue bar, deliberately NOT theme-following — it should
+     stay bright and identifiable whether the page around it is light or dark. */
+  nav.workflow-nav {
+    position: sticky; top: 0; z-index: 10;
+    background: #1c5cab; border-bottom: 1px solid rgba(0,0,0,0.15);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.15);
+  }
+  .nav-inner {
+    max-width: 1120px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 4px; height: 52px; overflow-x: auto;
+  }
+  .nav-brand {
+    font-weight: 700; font-size: 14px; color: #ffffff;
+    margin-right: 14px; white-space: nowrap;
+  }
+  .nav-tab {
+    appearance: none; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.75);
+    padding: 8px 12px; border-radius: 7px; white-space: nowrap;
+  }
+  .nav-tab:hover { background: rgba(255,255,255,0.12); color: #ffffff; }
+  .nav-tab.active { background: #ffffff; color: #1c5cab; }
+
+  header.page-head { margin-bottom: 24px; }
+  header.page-head h1 { font-size: 22px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+
+  section { margin-bottom: 30px; }
+  h2 { font-size: 14px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.04em;
+       color: var(--text-secondary); margin: 0 0 14px; }
+  h3.subtle { font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin: 0 0 10px; text-transform: none; letter-spacing: 0; }
+
+  /* Program explainer */
+  .program-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.7;
+  }
+  .program-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; font-size: 12.5px; }
+  .flow-chip { background: var(--gridline); border-radius: 6px; padding: 5px 10px; color: var(--text-primary); font-weight: 600; white-space: nowrap; }
+  .flow-chip.bofu { background: color-mix(in srgb, var(--step-4) 18%, var(--surface-1)); color: var(--step-4); }
+  .flow-branch { color: var(--text-muted); font-size: 12px; margin-left: 4px; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .kpi-tile .label { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px; }
+  .kpi-tile .value { font-size: 30px; font-weight: 650; line-height: 1; letter-spacing: -0.02em; }
+  .kpi-tile .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+
+  /* Charts row */
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+  @media (max-width: 800px) { .chart-row { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px 16px;
+  }
+  .chart-card .chart-title { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+  .chart-card .chart-caption { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+
+  .hbar-row { display: grid; grid-template-columns: 172px 1fr 56px; align-items: center; gap: 10px; min-height: 34px; }
+  .hbar-row .hbar-label { font-size: 12.5px; color: var(--text-secondary); text-align: right; line-height: 1.3; }
+  .hbar-track { position: relative; height: 20px; background: var(--gridline); border-radius: 4px; overflow: visible; }
+  .hbar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; transition: width .2s ease; }
+  .hbar-value { font-size: 12.5px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* Table */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-1); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px;
+    text-transform: uppercase; letter-spacing: .03em; padding: 12px 14px; border-bottom: 1px solid var(--border);
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  thead th .arrow { color: var(--text-muted); font-size: 10px; margin-left: 4px; }
+  thead th.num, tbody td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody td { padding: 11px 14px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: color-mix(in srgb, var(--step-1) 10%, transparent); }
+  .stage-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; }
+  .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+</style>
+</head>
+<body>
+
+<div class="viz-root">
+  <nav class="workflow-nav">
+    <div class="nav-inner" id="nav-inner">
+      <span class="nav-brand">Everlytic Workflow Reports</span>
+      <!-- nav-tab buttons injected by JS from WORKFLOWS, in insertion order -->
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <main id="report-root"></main>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ------------------------------------------------------------------
+  // To add another workflow: add a new key to WORKFLOWS below with the
+  // same shape (see "finance" for the full shape), pull its data the
+  // same way (everlytic_report.py --list-id <id>, then classify each
+  // contact's stage from real open/click history), and it will appear
+  // in the nav automatically.
+  // ------------------------------------------------------------------
+
+  // Matched by prefix, since e.g. "MOFU Mailer 2 - 2nd subject line" should
+  // share its base mailer's color rather than needing its own entry.
+  function mailerColor(label) {
+    if (label.startsWith('BOFU Mailer')) return 'var(--step-4)';
+    if (label.startsWith('MOFU Mailer 1')) return 'var(--step-1)';
+    if (label.startsWith('MOFU Mailer 2')) return 'var(--step-2)';
+    if (label.startsWith('MOFU Mailer 3')) return 'var(--step-3)';
+    return 'var(--step-1)';
+  }
+  // Position labels layer a "Sitting at / Awaiting / Received" prefix on top
+  // of a mailer name - color by mailer, but flag anything still pending
+  // ("Awaiting") with the warning color regardless of which mailer it's for.
+  function positionColor(label) {
+    if (label.startsWith('Awaiting ')) return 'var(--warning)';
+    return mailerColor(label.replace(/^(Sitting at |Received )/, ''));
+  }
+  const stepColors = ['var(--step-1)', 'var(--step-2)', 'var(--step-3)'];
+
+  const WORKFLOWS = {
+
+    finance: {
+      navLabel: 'Finance Calculator Nurture',
+      title: 'BF Nymbis Finance Calculator Nurture',
+      listId: '100515', // Everlytic list this report is pulled from
+      kpis: {
+        contacts: 14,
+        sent: 34,
+        avgPerContact: '2.4',
+        openedReach: 8, openedTotal: 14, openedPct: '57%', openedEvents: 15,
+        ctaReach: 6, ctaTotal: 14, ctaPct: '43%', ctaClicks: 16, socialClicks: 21,
+      },
+      reachChart: [
+        { label: 'Received emails',  value: 14, color: 'var(--step-1)', tooltip: '14 of 14 contacts (100%) received at least one Finance-workflow email' },
+        { label: 'Opened one+',      value: 8,  color: 'var(--step-3)', tooltip: '8 of 14 contacts (57%) opened at least one email' },
+        { label: 'Clicked CTA one+', value: 6,  color: 'var(--step-4)', tooltip: '6 of 14 contacts (43%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
+      ],
+      reachMax: 14,
+      stageBreakdown: [
+        { stage: "Awaiting MOFU Mailer 2", count: 1, sent: 1, opened: 1, clicked: 0 },
+        { stage: "Awaiting MOFU Mailer 3", count: 2, sent: 4, opened: 4, clicked: 3 },
+        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 1, sent: 2, opened: 0, clicked: 0 },
+        { stage: "Sitting at MOFU Mailer 1 - 3rd new subject line", count: 5, sent: 15, opened: 0, clicked: 0 },
+        { stage: "Sitting at MOFU Mailer 3", count: 1, sent: 3, opened: 3, clicked: 0 },
+        { stage: "Awaiting BOFU Mailer", count: 1, sent: 3, opened: 1, clicked: 1 },
+        { stage: "Received BOFU Mailer", count: 3, sent: 6, opened: 6, clicked: 12 },
+      ],
+      emailBreakdown: [
+        { mailer: "MOFU Mailer 1", count: 14, opened: 7, clicked: 10 },
+        { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 7, opened: 0, clicked: 0 },
+        { mailer: "MOFU Mailer 1 - 3rd new subject line", count: 6, opened: 1, clicked: 1 },
+        { mailer: "MOFU Mailer 2", count: 3, opened: 3, clicked: 2 },
+        { mailer: "MOFU Mailer 3", count: 1, opened: 1, clicked: 0 },
+        { mailer: "BOFU Mailer", count: 3, opened: 3, clicked: 3 },
+      ],
+    },
+
+    legal: {
+      navLabel: 'Legal Calculator Nurture',
+      title: 'BF Nymbis Legal Calculator Nurture',
+      listId: '100590', // Everlytic list this report is pulled from
+      kpis: {
+        contacts: 42,
+        sent: 100,
+        avgPerContact: '2.4',
+        openedReach: 28, openedTotal: 42, openedPct: '67%', openedEvents: 52,
+        ctaReach: 21, ctaTotal: 42, ctaPct: '50%', ctaClicks: 47, socialClicks: 70,
+      },
+      reachChart: [
+        { label: 'Received emails',  value: 42, color: 'var(--step-1)', tooltip: '42 of 42 contacts (100%) received at least one Legal-workflow email' },
+        { label: 'Opened one+',      value: 28, color: 'var(--step-3)', tooltip: '28 of 42 contacts (67%) opened at least one email' },
+        { label: 'Clicked CTA one+', value: 21, color: 'var(--step-4)', tooltip: '21 of 42 contacts (50%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
+      ],
+      reachMax: 42,
+      stageBreakdown: [
+        { stage: "Sitting at MOFU Mailer 1 - 3rd new subject line", count: 11, sent: 33, opened: 0, clicked: 0 },
+        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 3, sent: 6, opened: 0, clicked: 0 },
+        { stage: "Awaiting MOFU Mailer 2", count: 1, sent: 3, opened: 1, clicked: 0 },
+        { stage: "Awaiting MOFU Mailer 2 - 2nd subject line", count: 1, sent: 3, opened: 1, clicked: 0 },
+        { stage: "Sitting at MOFU Mailer 3", count: 4, sent: 12, opened: 12, clicked: 0 },
+        { stage: "Awaiting MOFU Mailer 3", count: 1, sent: 3, opened: 2, clicked: 0 },
+        { stage: "Awaiting BOFU Mailer", count: 4, sent: 6, opened: 4, clicked: 6 },
+        { stage: "Received BOFU Mailer", count: 17, sent: 34, opened: 32, clicked: 41 },
+      ],
+      emailBreakdown: [
+        { mailer: "MOFU Mailer 1", count: 42, opened: 24, clicked: 34 },
+        { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 18, opened: 2, clicked: 0 },
+        { mailer: "MOFU Mailer 1 - 3rd new subject line", count: 13, opened: 2, clicked: 1 },
+        { mailer: "MOFU Mailer 2", count: 6, opened: 5, clicked: 0 },
+        { mailer: "MOFU Mailer 3", count: 4, opened: 4, clicked: 0 },
+        { mailer: "BOFU Mailer", count: 17, opened: 15, clicked: 12 },
+      ],
+    },
+
+    itvertical: {
+      navLabel: 'IT Vertical Calculator Nurture',
+      title: 'BF Nymbis IT Vertical Calculator Nurture',
+      listId: '101110', // Everlytic list this report is pulled from
+      kpis: {
+        contacts: 4,
+        sent: 7,
+        avgPerContact: '1.8',
+        openedReach: 2, openedTotal: 4, openedPct: '50%', openedEvents: 2,
+        ctaReach: 2, ctaTotal: 4, ctaPct: '50%', ctaClicks: 2, socialClicks: 3,
+      },
+      reachChart: [
+        { label: 'Received emails',  value: 4, color: 'var(--step-1)', tooltip: '4 of 4 contacts (100%) received at least one IT Vertical-workflow email' },
+        { label: 'Opened one+',      value: 2, color: 'var(--step-3)', tooltip: '2 of 4 contacts (50%) opened at least one email' },
+        { label: 'Clicked CTA one+', value: 2, color: 'var(--step-4)', tooltip: '2 of 4 contacts (50%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
+      ],
+      reachMax: 4,
+      stageBreakdown: [
+        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 2, sent: 4, opened: 0, clicked: 0 },
+        { stage: "Awaiting BOFU Mailer", count: 2, sent: 3, opened: 2, clicked: 2 },
+      ],
+      emailBreakdown: [
+        { mailer: "MOFU Mailer 1", count: 4, opened: 1, clicked: 1 },
+        { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 3, opened: 1, clicked: 1 },
+      ],
+    },
+
+  };
+
+  // ------------------------------------------------------------------
+  // Generic rendering — same logic drives every workflow's page
+  // ------------------------------------------------------------------
+
+  function renderHBars(containerId, rows, maxOverride) {
+    const max = maxOverride || Math.max(...rows.map(r => r.value));
+    const el = document.getElementById(containerId);
+    el.innerHTML = rows.map((r) => {
+      const pct = Math.max((r.value / max) * 100, 2);
+      return `<div class="hbar-row" title="${r.tooltip}">
+        <div class="hbar-label">${r.label}</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${r.color}"></div></div>
+        <div class="hbar-value">${r.value}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function stageRowHtml(s) {
+    return `<tr>
+      <td><span class="stage-badge"><span class="stage-dot" style="background:${positionColor(s.stage)}"></span>${s.stage}</span></td>
+      <td class="num">${s.count}</td>
+      <td class="num">${s.sent}</td>
+      <td class="num">${s.opened}</td>
+      <td class="num">${s.clicked}</td>
+    </tr>`;
+  }
+
+  function emailRowHtml(e) {
+    return `<tr>
+      <td><span class="stage-badge"><span class="stage-dot" style="background:${mailerColor(e.mailer)}"></span>${e.mailer}</span></td>
+      <td class="num">${e.count}</td>
+      <td class="num">${e.opened}</td>
+      <td class="num">${e.clicked}</td>
+    </tr>`;
+  }
+
+  function pageHtml(wf) {
+    const k = wf.kpis;
+    return `
+      <header class="page-head">
+        <h1>${wf.title} — Detailed Workflow Report</h1>
+      </header>
+
+      <section>
+        <div class="program-card">
+          <strong>How this program is structured:</strong> Mailer 1 goes out to everyone. Clicking its CTA
+          — on any subject-line attempt — sends the BOFU email; clicking a later mailer's CTA does not.
+          Not opening a mailer resends it with a new subject line (up to a 2nd attempt on Mailer 1, one
+          resend on Mailer 2); opening it without clicking advances to the next numbered mailer:
+          <div class="program-flow">
+            <span class="flow-chip">Didn't open → same mailer, new subject line</span>
+          </div>
+          <div class="program-flow">
+            <span class="flow-chip">Opened, didn't click → next numbered mailer</span>
+          </div>
+          <div class="program-flow">
+            <span class="flow-chip bofu">Clicked Mailer 1's CTA (any subject line) → BOFU email</span>
+            <span class="flow-branch">(final step)</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>At a glance</h2>
+        <div class="kpi-row">
+          <div class="kpi-tile">
+            <div class="label">Contacts in workflow</div>
+            <div class="value">${k.contacts}</div>
+            <div class="sub">all confirmed via enrollment event</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="label">Nurture emails sent</div>
+            <div class="value">${k.sent}</div>
+            <div class="sub">avg ${k.avgPerContact} per contact</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="label">Opened at least one</div>
+            <div class="value">${k.openedReach} <span style="font-size:16px;color:var(--text-muted);font-weight:500;">/ ${k.openedTotal}</span></div>
+            <div class="sub">${k.openedPct} · ${k.openedEvents} open events total</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="label">Clicked the CTA at least once</div>
+            <div class="value">${k.ctaReach} <span style="font-size:16px;color:var(--text-muted);font-weight:500;">/ ${k.ctaTotal}</span></div>
+            <div class="sub">${k.ctaPct} · ${k.ctaClicks} real CTA clicks (${k.socialClicks} social-icon clicks excluded)</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="chart-row">
+          <div class="chart-card">
+            <div class="chart-title">Contact reach through the workflow</div>
+            <div class="chart-caption">How many of the ${k.contacts} contacts reached each stage</div>
+            <div id="reach-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Where contacts are sitting right now</div>
+            <div class="chart-caption">Grouped by number of workflow emails received so far</div>
+            <div id="stage-chart"></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Where contacts stand — by position</h2>
+        <h3 class="subtle">No individual contact data is shown here — counts and totals only.</h3>
+        <div class="table-scroll">
+          <table id="summary-table">
+            <thead>
+              <tr>
+                <th data-key="stage">Current position</th>
+                <th data-key="count" class="num">Contacts<span class="arrow"></span></th>
+                <th data-key="sent" class="num">Sent<span class="arrow"></span></th>
+                <th data-key="opened" class="num">Opened<span class="arrow"></span></th>
+                <th data-key="clicked" class="num">Clicked<span class="arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="summary-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>How each mailer performed</h2>
+        <h3 class="subtle">Aggregated across all contacts who received it — no individual contact data shown.</h3>
+        <div class="table-scroll">
+          <table id="detail-table">
+            <thead>
+              <tr>
+                <th data-key="mailer">Mailer</th>
+                <th data-key="count" class="num">Times sent<span class="arrow"></span></th>
+                <th data-key="opened" class="num">Opened<span class="arrow"></span></th>
+                <th data-key="clicked" class="num">Clicked<span class="arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="detail-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  function makeSortable(tableId, dataRef, renderFn, getVal) {
+    let sortState = { key: null, dir: 1 };
+    document.querySelectorAll(`#${tableId} thead th`).forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        sortState.dir = (sortState.key === key) ? -sortState.dir : 1;
+        sortState.key = key;
+        document.querySelectorAll(`#${tableId} thead .arrow`).forEach(a => a.textContent = '');
+        const arrow = th.querySelector('.arrow');
+        if (arrow) arrow.textContent = sortState.dir === 1 ? '↑' : '↓';
+        const sorted = [...dataRef].sort((a, b) => {
+          const av = getVal(a, key), bv = getVal(b, key);
+          if (typeof av === 'string') return sortState.dir * av.localeCompare(bv);
+          return sortState.dir * (av - bv);
+        });
+        renderFn(sorted);
+      });
+    });
+  }
+
+  function renderWorkflow(key) {
+    const wf = WORKFLOWS[key];
+    if (!wf) return;
+
+    document.getElementById('report-root').innerHTML = pageHtml(wf);
+
+    renderHBars('reach-chart', wf.reachChart, wf.reachMax);
+    renderHBars('stage-chart', wf.stageBreakdown.map(s => ({
+      label: s.stage, value: s.count, color: positionColor(s.stage),
+      tooltip: `${s.count} contact${s.count === 1 ? '' : 's'} — ${s.stage.toLowerCase()}`,
+    })));
+
+    function renderSummary(rows) { document.getElementById('summary-tbody').innerHTML = rows.map(stageRowHtml).join(''); }
+    function renderDetail(rows) { document.getElementById('detail-tbody').innerHTML = rows.map(emailRowHtml).join(''); }
+
+    renderSummary(wf.stageBreakdown);
+    renderDetail(wf.emailBreakdown);
+
+    makeSortable('summary-table', wf.stageBreakdown, renderSummary, (s, k) => s[k]);
+    makeSortable('detail-table', wf.emailBreakdown, renderDetail, (e, k) => e[k]);
+
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.key === key);
+    });
+    window.location.hash = key;
+    document.title = wf.title + ' — Workflow Report';
+  }
+
+  // Build nav bar from WORKFLOWS in insertion order
+  const navInner = document.getElementById('nav-inner');
+  Object.keys(WORKFLOWS).forEach(key => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-tab';
+    btn.dataset.key = key;
+    btn.textContent = WORKFLOWS[key].navLabel;
+    btn.addEventListener('click', () => renderWorkflow(key));
+    navInner.appendChild(btn);
+  });
+
+  const initialKey = (window.location.hash || '').replace('#', '');
+  renderWorkflow(WORKFLOWS[initialKey] ? initialKey : Object.keys(WORKFLOWS)[0]);
+})();
+</script>
+</body>
+</html>
