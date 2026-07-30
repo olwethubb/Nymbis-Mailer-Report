@@ -226,7 +226,7 @@
         { status: "Clicked BOFU", sent: 2, count: 3, opened: 2, clicked: 2 },
       ],
       contactsClickedToPage: 6,
-      clickedBreakdown: { onlyCalculator: 3, onlyBofu: 0, both: 3 },
+      clickedBreakdown: { onlyCalculator: 3, both: 3 },
       emailBreakdown: [
         { mailer: "MOFU Mailer 1", count: 14, opened: 7, clicked: 4 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 7, opened: 0, clicked: 0 },
@@ -267,7 +267,7 @@
         { status: "Clicked BOFU", sent: 2, count: 12, opened: 2, clicked: 2 },
       ],
       contactsClickedToPage: 21,
-      clickedBreakdown: { onlyCalculator: 9, onlyBofu: 0, both: 12 },
+      clickedBreakdown: { onlyCalculator: 9, both: 12 },
       emailBreakdown: [
         { mailer: "MOFU Mailer 1", count: 42, opened: 24, clicked: 20 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 18, opened: 2, clicked: 0 },
@@ -461,17 +461,13 @@
             </thead>
             <tbody>
               <tr>
-                <td>Number of contacts who clicked to the page</td>
+                <td>Number of contacts who clicked to a page</td>
                 <td class="num">${wf.contactsClickedToPage} / ${k.contacts}</td>
               </tr>
               ${wf.clickedBreakdown ? `
               <tr>
                 <td>Clicked only the Calculator page</td>
                 <td class="num">${wf.clickedBreakdown.onlyCalculator} / ${k.contacts}</td>
-              </tr>
-              <tr>
-                <td>Clicked only the BOFU page</td>
-                <td class="num">${wf.clickedBreakdown.onlyBofu} / ${k.contacts}</td>
               </tr>
               <tr>
                 <td>Clicked both the Calculator and BOFU pages</td>
