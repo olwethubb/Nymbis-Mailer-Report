@@ -218,10 +218,12 @@
       clickStatus: [
         { status: "Haven't clicked to any page", sent: 1, count: 1, opened: 1, clicked: 0 },
         { status: "Haven't clicked to any page", sent: 2, count: 1, opened: 0, clicked: 0 },
-        { status: "Haven't clicked to any page", sent: 3, count: 6, opened: 3, clicked: 0 },
-        { status: "Clicked Calculator", sent: 2, count: 2, opened: 4, clicked: 3 },
+        { status: "Haven't clicked to any page", sent: 3, count: 5, opened: 0, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 1, opened: 3, clicked: 0 },
+        { status: "Clicked Calculator", sent: 2, count: 1, opened: 2, clicked: 1 },
+        { status: "Clicked Calculator", sent: 2, count: 1, opened: 2, clicked: 2 },
         { status: "Clicked Calculator", sent: 3, count: 1, opened: 1, clicked: 1 },
-        { status: "Clicked BOFU", sent: 2, count: 3, opened: 6, clicked: 6 },
+        { status: "Clicked BOFU", sent: 2, count: 3, opened: 2, clicked: 2 },
       ],
       contactsClickedToPage: 6,
       clickedBreakdown: { onlyCalculator: 3, onlyBofu: 0, both: 3 },
@@ -254,11 +256,15 @@
       reachMax: 42,
       clickStatus: [
         { status: "Haven't clicked to any page", sent: 2, count: 3, opened: 0, clicked: 0 },
-        { status: "Haven't clicked to any page", sent: 3, count: 18, opened: 16, clicked: 0 },
-        { status: "Clicked Calculator", sent: 1, count: 3, opened: 3, clicked: 3 },
-        { status: "Clicked Calculator", sent: 2, count: 5, opened: 8, clicked: 5 },
+        { status: "Haven't clicked to any page", sent: 3, count: 11, opened: 0, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 2, opened: 1, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 1, opened: 2, clicked: 0 },
+        { status: "Haven't clicked to any page", sent: 3, count: 4, opened: 3, clicked: 0 },
+        { status: "Clicked Calculator", sent: 1, count: 3, opened: 1, clicked: 1 },
+        { status: "Clicked Calculator", sent: 2, count: 2, opened: 1, clicked: 1 },
+        { status: "Clicked Calculator", sent: 2, count: 3, opened: 2, clicked: 1 },
         { status: "Clicked Calculator", sent: 3, count: 1, opened: 1, clicked: 1 },
-        { status: "Clicked BOFU", sent: 2, count: 12, opened: 24, clicked: 24 },
+        { status: "Clicked BOFU", sent: 2, count: 12, opened: 2, clicked: 2 },
       ],
       contactsClickedToPage: 21,
       clickedBreakdown: { onlyCalculator: 9, onlyBofu: 0, both: 12 },
@@ -408,7 +414,7 @@
 
       <section>
         <h2>Where contacts stand — by click status</h2>
-        <h3 class="subtle">No individual contact data is shown here — counts and totals only. Contacts are grouped by exactly how many emails they were sent, so "Emails sent" is a real number, not an average. "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
+        <h3 class="subtle">No individual contact data is shown here — counts only. Contacts are grouped by their exact emails sent / opened / clicked numbers, so every row is a real combination, not an average or a sum. "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
         <div class="table-scroll">
           <table id="summary-table">
             <thead>
