@@ -188,12 +188,13 @@
     if (label.startsWith('MOFU Mailer 3')) return 'var(--step-3)';
     return 'var(--step-1)';
   }
-  // Position labels layer a "Sitting at / Awaiting / Received" prefix on top
-  // of a mailer name - color by mailer, but flag anything still pending
-  // ("Awaiting") with the warning color regardless of which mailer it's for.
-  function positionColor(label) {
-    if (label.startsWith('Awaiting ')) return 'var(--warning)';
-    return mailerColor(label.replace(/^(Sitting at |Received )/, ''));
+  // Click-status labels: "Clicked BOFU" (highest engagement), "Clicked
+  // <calculator/CTA term>" (mid-funnel engagement), or "Haven't clicked to
+  // any page" (no engagement yet).
+  function clickStatusColor(label) {
+    if (label === 'Clicked BOFU') return 'var(--step-4)';
+    if (label.startsWith('Clicked ')) return 'var(--step-3)';
+    return 'var(--baseline)';
   }
   const stepColors = ['var(--step-1)', 'var(--step-2)', 'var(--step-3)'];
 
@@ -208,7 +209,7 @@
         sent: 34,
         avgPerContact: '2.4',
         openedReach: 8, openedTotal: 14, openedPct: '57%', openedEvents: 15,
-        ctaReach: 6, ctaTotal: 14, ctaPct: '43%', ctaClicks: 16, socialClicks: 21,
+        ctaReach: 6, ctaTotal: 14, ctaPct: '43%', ctaClicks: 10, socialClicks: 21,
       },
       reachChart: [
         { label: 'Received emails',  value: 14, color: 'var(--step-1)', tooltip: '14 of 14 contacts (100%) received at least one Finance-workflow email' },
@@ -216,17 +217,14 @@
         { label: 'Clicked CTA one+', value: 6,  color: 'var(--step-4)', tooltip: '6 of 14 contacts (43%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
       ],
       reachMax: 14,
-      stageBreakdown: [
-        { stage: "Awaiting MOFU Mailer 2", count: 1, sent: 1, opened: 1, clicked: 0 },
-        { stage: "Awaiting MOFU Mailer 3", count: 2, sent: 4, opened: 4, clicked: 3 },
-        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 1, sent: 2, opened: 0, clicked: 0 },
-        { stage: "Sitting at MOFU Mailer 1 - 3rd new subject line", count: 5, sent: 15, opened: 0, clicked: 0 },
-        { stage: "Sitting at MOFU Mailer 3", count: 1, sent: 3, opened: 3, clicked: 0 },
-        { stage: "Awaiting BOFU Mailer", count: 1, sent: 3, opened: 1, clicked: 1 },
-        { stage: "Received BOFU Mailer", count: 3, sent: 6, opened: 6, clicked: 12 },
+      clickStatus: [
+        { status: "Haven't clicked to any page", count: 8, sent: 21, opened: 4, clicked: 0 },
+        { status: "Clicked Calculator", count: 3, sent: 7, opened: 5, clicked: 4 },
+        { status: "Clicked BOFU", count: 3, sent: 6, opened: 6, clicked: 6 },
       ],
+      contactsClickedToPage: 6,
       emailBreakdown: [
-        { mailer: "MOFU Mailer 1", count: 14, opened: 7, clicked: 10 },
+        { mailer: "MOFU Mailer 1", count: 14, opened: 7, clicked: 4 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 7, opened: 0, clicked: 0 },
         { mailer: "MOFU Mailer 1 - 3rd new subject line", count: 6, opened: 1, clicked: 1 },
         { mailer: "MOFU Mailer 2", count: 3, opened: 3, clicked: 2 },
@@ -244,7 +242,7 @@
         sent: 100,
         avgPerContact: '2.4',
         openedReach: 28, openedTotal: 42, openedPct: '67%', openedEvents: 52,
-        ctaReach: 21, ctaTotal: 42, ctaPct: '50%', ctaClicks: 47, socialClicks: 70,
+        ctaReach: 21, ctaTotal: 42, ctaPct: '50%', ctaClicks: 33, socialClicks: 70,
       },
       reachChart: [
         { label: 'Received emails',  value: 42, color: 'var(--step-1)', tooltip: '42 of 42 contacts (100%) received at least one Legal-workflow email' },
@@ -252,18 +250,14 @@
         { label: 'Clicked CTA one+', value: 21, color: 'var(--step-4)', tooltip: '21 of 42 contacts (50%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
       ],
       reachMax: 42,
-      stageBreakdown: [
-        { stage: "Sitting at MOFU Mailer 1 - 3rd new subject line", count: 11, sent: 33, opened: 0, clicked: 0 },
-        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 3, sent: 6, opened: 0, clicked: 0 },
-        { stage: "Awaiting MOFU Mailer 2", count: 1, sent: 3, opened: 1, clicked: 0 },
-        { stage: "Awaiting MOFU Mailer 2 - 2nd subject line", count: 1, sent: 3, opened: 1, clicked: 0 },
-        { stage: "Sitting at MOFU Mailer 3", count: 4, sent: 12, opened: 12, clicked: 0 },
-        { stage: "Awaiting MOFU Mailer 3", count: 1, sent: 3, opened: 2, clicked: 0 },
-        { stage: "Awaiting BOFU Mailer", count: 4, sent: 6, opened: 4, clicked: 6 },
-        { stage: "Received BOFU Mailer", count: 17, sent: 34, opened: 32, clicked: 41 },
+      clickStatus: [
+        { status: "Haven't clicked to any page", count: 21, sent: 60, opened: 16, clicked: 0 },
+        { status: "Clicked Calculator", count: 9, sent: 16, opened: 12, clicked: 9 },
+        { status: "Clicked BOFU", count: 12, sent: 24, opened: 24, clicked: 24 },
       ],
+      contactsClickedToPage: 21,
       emailBreakdown: [
-        { mailer: "MOFU Mailer 1", count: 42, opened: 24, clicked: 34 },
+        { mailer: "MOFU Mailer 1", count: 42, opened: 24, clicked: 20 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 18, opened: 2, clicked: 0 },
         { mailer: "MOFU Mailer 1 - 3rd new subject line", count: 13, opened: 2, clicked: 1 },
         { mailer: "MOFU Mailer 2", count: 6, opened: 5, clicked: 0 },
@@ -289,10 +283,11 @@
         { label: 'Clicked CTA one+', value: 2, color: 'var(--step-4)', tooltip: '2 of 4 contacts (50%) clicked the actual CTA link in at least one email (social-icon clicks excluded)' },
       ],
       reachMax: 4,
-      stageBreakdown: [
-        { stage: "Awaiting MOFU Mailer 1 - 3rd new subject line", count: 2, sent: 4, opened: 0, clicked: 0 },
-        { stage: "Awaiting BOFU Mailer", count: 2, sent: 3, opened: 2, clicked: 2 },
+      clickStatus: [
+        { status: "Haven't clicked to any page", count: 2, sent: 4, opened: 0, clicked: 0 },
+        { status: "Clicked CTA link", count: 2, sent: 3, opened: 2, clicked: 2 },
       ],
+      contactsClickedToPage: 2,
       emailBreakdown: [
         { mailer: "MOFU Mailer 1", count: 4, opened: 1, clicked: 1 },
         { mailer: "MOFU Mailer 1 - 2nd new subject line", count: 3, opened: 1, clicked: 1 },
@@ -318,9 +313,9 @@
     }).join('');
   }
 
-  function stageRowHtml(s) {
+  function clickStatusRowHtml(s) {
     return `<tr>
-      <td><span class="stage-badge"><span class="stage-dot" style="background:${positionColor(s.stage)}"></span>${s.stage}</span></td>
+      <td><span class="stage-badge"><span class="stage-dot" style="background:${clickStatusColor(s.status)}"></span>${s.status}</span></td>
       <td class="num">${s.count}</td>
       <td class="num">${s.sent}</td>
       <td class="num">${s.opened}</td>
@@ -384,7 +379,7 @@
           <div class="kpi-tile">
             <div class="label">Clicked the CTA at least once</div>
             <div class="value">${k.ctaReach} <span style="font-size:16px;color:var(--text-muted);font-weight:500;">/ ${k.ctaTotal}</span></div>
-            <div class="sub">${k.ctaPct} · ${k.ctaClicks} real CTA clicks (${k.socialClicks} social-icon clicks excluded)</div>
+            <div class="sub">${k.ctaPct} · ${k.ctaClicks} mailers clicked (1 per contact per mailer; ${k.socialClicks} social-icon clicks excluded)</div>
           </div>
         </div>
       </section>
@@ -398,20 +393,20 @@
           </div>
           <div class="chart-card">
             <div class="chart-title">Where contacts are sitting right now</div>
-            <div class="chart-caption">Grouped by number of workflow emails received so far</div>
+            <div class="chart-caption">Grouped by click status</div>
             <div id="stage-chart"></div>
           </div>
         </div>
       </section>
 
       <section>
-        <h2>Where contacts stand — by position</h2>
-        <h3 class="subtle">No individual contact data is shown here — counts and totals only.</h3>
+        <h2>Where contacts stand — by click status</h2>
+        <h3 class="subtle">No individual contact data is shown here — counts and totals only. "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
         <div class="table-scroll">
           <table id="summary-table">
             <thead>
               <tr>
-                <th data-key="stage">Current position</th>
+                <th data-key="status">Click status</th>
                 <th data-key="count" class="num">Contacts<span class="arrow"></span></th>
                 <th data-key="sent" class="num">Sent<span class="arrow"></span></th>
                 <th data-key="opened" class="num">Opened<span class="arrow"></span></th>
@@ -425,7 +420,7 @@
 
       <section>
         <h2>How each mailer performed</h2>
-        <h3 class="subtle">Aggregated across all contacts who received it — no individual contact data shown.</h3>
+        <h3 class="subtle">Aggregated across all contacts who received it — no individual contact data shown. "Clicked" counts a contact once per mailer, no matter how many times they clicked it.</h3>
         <div class="table-scroll">
           <table id="detail-table">
             <thead>
@@ -437,6 +432,26 @@
               </tr>
             </thead>
             <tbody id="detail-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>How many contacts clicked to the page</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th class="num">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Number of contacts who clicked to the page</td>
+                <td class="num">${wf.contactsClickedToPage} / ${k.contacts}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </section>
@@ -470,18 +485,18 @@
     document.getElementById('report-root').innerHTML = pageHtml(wf);
 
     renderHBars('reach-chart', wf.reachChart, wf.reachMax);
-    renderHBars('stage-chart', wf.stageBreakdown.map(s => ({
-      label: s.stage, value: s.count, color: positionColor(s.stage),
-      tooltip: `${s.count} contact${s.count === 1 ? '' : 's'} — ${s.stage.toLowerCase()}`,
+    renderHBars('stage-chart', wf.clickStatus.map(s => ({
+      label: s.status, value: s.count, color: clickStatusColor(s.status),
+      tooltip: `${s.count} contact${s.count === 1 ? '' : 's'} — ${s.status.toLowerCase()}`,
     })));
 
-    function renderSummary(rows) { document.getElementById('summary-tbody').innerHTML = rows.map(stageRowHtml).join(''); }
+    function renderSummary(rows) { document.getElementById('summary-tbody').innerHTML = rows.map(clickStatusRowHtml).join(''); }
     function renderDetail(rows) { document.getElementById('detail-tbody').innerHTML = rows.map(emailRowHtml).join(''); }
 
-    renderSummary(wf.stageBreakdown);
+    renderSummary(wf.clickStatus);
     renderDetail(wf.emailBreakdown);
 
-    makeSortable('summary-table', wf.stageBreakdown, renderSummary, (s, k) => s[k]);
+    makeSortable('summary-table', wf.clickStatus, renderSummary, (s, k) => s[k]);
     makeSortable('detail-table', wf.emailBreakdown, renderDetail, (e, k) => e[k]);
 
     document.querySelectorAll('.nav-tab').forEach(btn => {
